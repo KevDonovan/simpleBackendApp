@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs')
 const url = require('url');
 const querystring = require('querystring');
-const figlet = require('figlet')
+const figlet = require('figlet');
 
 const server = http.createServer((req, res) => {
   const page = url.parse(req.url).pathname;
@@ -10,62 +10,81 @@ const server = http.createServer((req, res) => {
   const filePath = page.slice(page.indexOf('/')+1);
   console.log(page);
   console.log(filePath);
-  /*
-  const pageObj = {
-    '/' : function(){this.readHTML('index.html')},
-    '/otherpage' : function(){this.readHTML('/otherpage.html')},
-    '/otherotherpage' : function(){this.readHTML('/otherotherpage.html')},
-    '/api' : function(){this.reqAPI()},
-    '/css/style.css': function(){this.reqCSS(`${filePath}.css`)},
-    '/js/main.js': function(){this.reqJS(`${filePath}.js`)},
 
-    readHTML: function (htmlPage) {
-      fs.readFile(`${htmlPage}.html`, function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.write(data);
-        res.end();
-      });
-    },
-    reqAPI: function (){
-      if('student' in params){
-        if(params['student'] == 'Kevin'){
-          res.writeHead(200, {'Content-Type': 'application/json'});
-          const objToJson = {
-            name: "Kevin",
-            status: "BDK",
-            currentOccupation: "Irish Butter"
-          }
-          res.end(JSON.stringify(objToJson));
-        }
-        else if(params['student'] != 'Kevin'){
-          res.writeHead(200, {'Content-Type': 'application/json'});
-          const objToJson = {
-            name: "unknown",
-            status: "unknown",
-            currentOccupation: "unknown"
-          }
-          res.end(JSON.stringify(objToJson));
-        }
-      }
-    },
-    reqCSS: function (cssFile){
-      fs.readFile(cssFile, function(err, data) {
-      res.write(data);
-      res.end();
-      });
-    },
-    reqJS: function (jsFile){
-      fs.readFile(jsFile, function(err, data) {
-        res.writeHead(200, {'Content-Type': 'text/javascript'});
-        res.write(data);
-        res.end();
-      });
-    }
+  switch(page){
+    case '/':
+    case '/otherpage':
+    case '/otherotherpage':
+      readHTML(page);
+      break;
+    case '/api':
+      reqAPI();
+      break;
+    case '/css/style.css':
+      reqCSS(filePath);
+      break;
+    case '/js/main.js':
+      reqJS(filePath);
+      break;
+    default:
+      notFound();
   }
 
-  pageObj[page]();
-*/
-  
+  function readHTML(htmlPage) {
+    if(htmlPage === '/') htmlPage = 'index';
+    fs.readFile(`${htmlPage}.html`, function(err, data) {
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.write(data);
+      res.end();
+    });
+  }
+  function reqAPI(){
+    if('student' in params){
+      if(params['student'] == 'Kevin'){
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        const objToJson = {
+          name: "Kevin",
+          status: "BDK",
+          currentOccupation: "Irish Butter"
+        }
+        res.end(JSON.stringify(objToJson));
+      }
+      else if(params['student'] != 'Kevin'){
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        const objToJson = {
+          name: "unknown",
+          status: "unknown",
+          currentOccupation: "unknown"
+        }
+        res.end(JSON.stringify(objToJson));
+      }
+    }
+  }
+  function reqCSS(cssFile){
+    fs.readFile(cssFile, function(err, data) {
+    res.write(data);
+    res.end();
+    });
+  }
+  function reqJS(jsFile){
+    fs.readFile(jsFile, function(err, data) {
+      res.writeHead(200, {'Content-Type': 'text/javascript'});
+      res.write(data);
+      res.end();
+    });
+  }
+  function notFound(){
+    figlet('404!!', function(err, data) {
+      if (err) {
+          console.log('Something went wrong...');
+          console.dir(err);
+          return;
+      }
+      res.write(data);
+      res.end();
+    });
+  }
+/*  
   if (page == '/') {
     fs.readFile('index.html', function(err, data) {
       res.writeHead(200, {'Content-Type': 'text/html'});
@@ -131,7 +150,7 @@ const server = http.createServer((req, res) => {
       res.end();
     });
   }
-  
+  */
 });
 
 server.listen(8000);
